@@ -356,64 +356,102 @@ function getAdtService(): AbapAdtService {
   return adtService;
 }
 
-// Azure Function HTTP endpoint
+// Azure Function HTTP endpoint with MCP SSE support
 export async function mcpHandler(
   request: HttpRequest,
   context: InvocationContext
 ): Promise<HttpResponseInit> {
-  context.log(`MCP request received for ${request.url}`);
+  context.log(`MCP request received: ${request.method} ${request.url}`);
 
+  // Handle SSE endpoint (GET request)
+  if (request.method === 'GET') {
+    context.log('SSE endpoint requested');
+    return {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: 'data: {"jsonrpc":"2.0","method":"endpoint"}\n\n'
+    };
+  }
+
+  // Handle MCP JSON-RPC requests (POST)
   try {
     const service = getAdtService();
-    const body = await request.json() as { method: string; params?: any };
+    const body = await request.json() as { 
+      jsonrpc?: string;
+      id?: number | string;
+      method: string; 
+      params?: any 
+    };
+    
     const method = body.method;
     const params = body.params || {};
+    const id = body.id;
 
-    // Route based on MCP method
-    if (method === 'tools/list') {
-      return {
-        status: 200,
-        jsonBody: {
-          tools: service.getTools()
+    context.log(`Processing MCP method: ${method}`);
+
+    let result: any;
+
+    // Handle MCP protocol methods
+    if (method === 'initialize') {
+      result = {
+        protocolVersion: '2024-11-05',
+        capabilities: {
+          tools: {}
+        },
+        serverInfo: {
+          name: 'abap-adt-api',
+          version: '0.1.1'
         }
+      };
+    } else if (method === 'tools/list') {
+      result = {
+        tools: service.getTools()
       };
     } else if (method === 'tools/call') {
       const toolName = params.name;
       const args = params.arguments || {};
       
-      const result = await service.callTool(toolName, args);
-      
+      const toolResult = await service.callTool(toolName, args);
+      result = JSON.parse(toolResult);
+    } else {
       return {
         status: 200,
         jsonBody: {
-          result: JSON.parse(result)
-        }
-      };
-    } else {
-      return {
-        status: 400,
-        jsonBody: {
-          error: `Unknown method: ${method}`
+          jsonrpc: '2.0',
+          id: id,
+          error: {
+            code: -32601,
+            message: `Method not found: ${method}`
+          }
         }
       };
     }
+
+    return {
+      status: 200,
+      jsonBody: {
+        jsonrpc: '2.0',
+        id: id,
+        result: result
+      }
+    };
   } catch (error: any) {
     context.error('Error processing request:', error);
     
-    if (error instanceof McpError) {
-      return {
-        status: error.code === ErrorCode.MethodNotFound ? 404 : 500,
-        jsonBody: {
-          error: error.message,
-          code: error.code
-        }
-      };
-    }
-    
     return {
-      status: 500,
+      status: 200,
       jsonBody: {
-        error: error.message || 'Internal server error'
+        jsonrpc: '2.0',
+        id: (await request.json() as any).id,
+        error: {
+          code: error instanceof McpError ? error.code : -32603,
+          message: error.message || 'Internal server error'
+        }
       }
     };
   }
@@ -421,8 +459,8 @@ export async function mcpHandler(
 
 // Register Azure Function
 app.http('mcp', {
-  methods: ['POST'],
-  authLevel: 'function',
+  methods: ['GET', 'POST'],
+  authLevel: 'anonymous',
   route: 'mcp',
   handler: mcpHandler
 });
