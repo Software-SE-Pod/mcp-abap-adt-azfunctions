@@ -1,0 +1,17 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "node",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "SAP_URL": "",
+    "SAP_USER": "",
+    "SAP_PASSWORD": "",
+    "SAP_CLIENT": "",
+    "SAP_LANGUAGE": "EN"
+  },
+  "Host": {
+    "LocalHttpPort": 7071,
+    "CORS": "*",
+    "CORSCredentials": false
+  }
+}

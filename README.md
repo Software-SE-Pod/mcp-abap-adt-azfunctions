@@ -6,7 +6,9 @@ DISCLAIMER: This server is still in experimental status! Use it with caution!
 
 ## Description
 
-The MCP-Server `mcp-abap-abap-adt-api` is a Model Context Protocol (MCP) server designed to facilitate seamless communication between ABAP systems and MCP clients. It is a wrapper for [abap-adt-api](https://github.com/marcellourbani/abap-adt-api/) and provides a suite of tools and resources for managing ABAP objects, handling transport requests, performing code analysis, and more, enhancing the efficiency and effectiveness of ABAP development workflows.
+The MCP-Server `mcp-abap-abap-adt-api` is an Azure Function that exposes ABAP Development Tools (ADT) capabilities through a single HTTP endpoint. It is a wrapper for [abap-adt-api](https://github.com/marcellourbani/abap-adt-api/) and provides a suite of tools for managing ABAP objects, handling transport requests, performing code analysis, and more, enhancing the efficiency and effectiveness of ABAP development workflows.
+
+The server can be run locally using Azure Functions Core Tools or deployed to Azure Functions for cloud-based access.
 
 ## Features
 
@@ -29,7 +31,8 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-abap-adt-api --client cl
 
 ### Prerequisites
 
-- **Node.js**: Ensure you have Node.js installed. You can download it from [here](https://nodejs.org/).
+- **Node.js**: Ensure you have Node.js v18+ installed. You can download it from [here](https://nodejs.org/).
+- **Azure Functions Core Tools**: Required for local development. Will be installed via npm.
 - **ABAP System Access**: Credentials and URL to access the ABAP system.
 
 ### Steps
@@ -47,34 +50,28 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-abap-adt-api --client cl
    npm install
    ```
 
-3. **Configure Environment Variables**
+3. **Configure Local Settings**
 
-   An `.env.example` file is provided in the root directory as a template for the required environment variables. To set up your environment:
+   Open the `local.settings.json` file and replace the placeholder values with your actual SAP connection details:
 
-   a. Copy the `.env.example` file and rename it to `.env`:
-      ```bash
-      cp .env.example .env
-      ```
-
-   b. Open the `.env` file and replace the placeholder values with your actual SAP connection details:
-
-      ```env
-      SAP_URL=https://your-sap-server.com:44300
-      SAP_USER=YOUR_SAP_USERNAME
-      SAP_PASSWORD=YOUR_SAP_PASSWORD
-      SAP_CLIENT=YOUR_SAP_CLIENT
-      SAP_LANGUAGE=YOUR_SAP_LANGUAGE
-      ```
-
-   Note: The SAP_CLIENT and SAP_LANGUAGE variables are optional but recommended.
-
-   If you're using self-signed certificates, you can also set:
-
-   ```env
-   NODE_TLS_REJECT_UNAUTHORIZED="0"
+   ```json
+   {
+     "IsEncrypted": false,
+     "Values": {
+       "FUNCTIONS_WORKER_RUNTIME": "node",
+       "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+       "SAP_URL": "https://your-sap-server.com:44300",
+       "SAP_USER": "YOUR_SAP_USERNAME",
+       "SAP_PASSWORD": "YOUR_SAP_PASSWORD",
+       "SAP_CLIENT": "100",
+       "SAP_LANGUAGE": "EN"
+     }
+   }
    ```
 
-   IMPORTANT: Never commit your `.env` file to version control. It's already included in `.gitignore` to prevent accidental commits.
+   Note: The SAP_CLIENT and SAP_LANGUAGE variables are optional but recommended. Default is "EN" for language.
+
+   **IMPORTANT**: Never commit your `local.settings.json` file to version control. It's already included in `.gitignore` to prevent accidental commits.
 
 4. **Build the Project**
 
@@ -82,29 +79,58 @@ npx -y @smithery/cli install @mario-andreschak/mcp-abap-abap-adt-api --client cl
    npm run build
    ```
 
-5. **Run the Server**
+5. **Run the Server Locally**
 
    ```cmd
-   npm run start
+   npm start
    ```
 
-   (or alternatively integrate the MCP Server into VSCode)
+   The Azure Function will start at `http://localhost:7071/api/mcp`
+
+   You can also run in watch mode during development:
+   ```cmd
+   npm run watch
+   ```
 
 ## Usage
 
-Once the server is running, you can interact with it using MCP clients or tools that support the Model Context Protocol (e.g. [Cline](https://github.com/cline/cline)). In order to integrate the MCP Server with Cline, use the following MCP Configuration:
-```
-    "mcp-abap-abap-adt-api": {
-      "command": "node",
-      "args": [
-        "PATH_TO_YOUR/mcp-abap-abap-adt-api/dist/index.js"
-      ],
-      "disabled": true,
-      "autoApprove": [
-      ]
-    },
+### Local Development
 
+Once the server is running locally, you can test it using HTTP requests:
+
+**List available tools:**
+```bash
+curl --request POST -H "Content-Type:application/json" --data '{"method":"tools/list"}' http://localhost:7071/api/mcp
 ```
+
+**Call a tool:**
+```bash
+curl --request POST -H "Content-Type:application/json" --data '{"method":"tools/call","params":{"name":"healthcheck","arguments":{}}}' http://localhost:7071/api/mcp
+```
+
+### Request Format
+
+The endpoint accepts POST requests with the following JSON structure:
+
+```json
+{
+  "method": "tools/list" | "tools/call",
+  "params": {
+    "name": "tool-name",
+    "arguments": {}
+  }
+}
+```
+
+### Azure Deployment
+
+To deploy to Azure Functions:
+
+1. Install Azure Functions extension for VS Code
+2. Use the Azure Functions extension to deploy
+3. Configure application settings in Azure Portal with your SAP credentials
+
+For detailed deployment instructions, see the [Azure Functions documentation](https://learn.microsoft.com/en-us/azure/azure-functions/functions-develop-vs-code).
 
 ## Custom Instruction
 Use this Custom Instruction to explain the tool to your model:

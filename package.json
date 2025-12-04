@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@azure/functions": "^4.0.0",
     "@modelcontextprotocol/sdk": "^1.4.1",
     "@types/node": "^22.10.10",
     "abap-adt-api": "^6.2.0",
@@ -8,13 +9,15 @@
   },
   "name": "mcp-abap-abap-adt-api",
   "version": "0.1.1",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "build": "tsc -p tsconfig.json",
-    "start": "node ./dist/index.js",
+    "watch": "tsc -p tsconfig.json --watch",
+    "start": "func start",
+    "prestart": "npm run build",
     "dev": "npx @modelcontextprotocol/inspector ./dist/index.js"
   },
   "keywords": [],
@@ -23,6 +26,7 @@
   "description": "",
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "azure-functions-core-tools": "^4.0.6280",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5"
   }
