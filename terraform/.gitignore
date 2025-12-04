@@ -1,0 +1,26 @@
+# Terraform files
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.sh
+.terraform/
+.terraform.lock.hcl
+
+# Deployment artifacts
+function_app.zip
+function_app_*.zip
+
+# Sensitive files
+terraform.tfvars.sh
+secrets.auto.tfvars
+*.env
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json

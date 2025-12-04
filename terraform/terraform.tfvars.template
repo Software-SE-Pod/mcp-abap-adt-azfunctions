@@ -1,0 +1,54 @@
+# Terraform Environment Variables Template
+# Copy this file and set the required values
+
+# ===========================================
+# Required: SAP Configuration
+# ===========================================
+# Your SAP server URL (including protocol and port)
+export TF_VAR_sap_url="https://your-sap-server.com:44300"
+
+# SAP username for authentication
+export TF_VAR_sap_user="YOUR_SAP_USERNAME"
+
+# SAP password (will be stored securely in Azure Key Vault)
+export TF_VAR_sap_password="YOUR_SAP_PASSWORD"
+
+# ===========================================
+# Optional: SAP Configuration
+# ===========================================
+# SAP client number (leave empty for default)
+export TF_VAR_sap_client="100"
+
+# SAP language code (default: EN)
+export TF_VAR_sap_language="EN"
+
+# Set to "0" to allow self-signed certificates (not recommended for production)
+export TF_VAR_node_tls_reject_unauthorized="1"
+
+# ===========================================
+# Optional: Azure Configuration
+# ===========================================
+# Environment name (dev, staging, prod)
+export TF_VAR_environment="dev"
+
+# Azure region for deployment
+export TF_VAR_location="eastus"
+
+# Project name for resource naming
+export TF_VAR_project_name="mcp-abap-adt"
+
+# Function App SKU (Y1=Consumption, EP1=Elastic Premium, P1V2=Premium)
+export TF_VAR_function_app_sku="Y1"
+
+# Enable Application Insights monitoring
+export TF_VAR_enable_app_insights="true"
+
+# ===========================================
+# Usage Instructions
+# ===========================================
+# 1. Copy this file: cp terraform.tfvars.template terraform.tfvars.sh
+# 2. Edit terraform.tfvars.sh with your actual values
+# 3. Source the file: source terraform.tfvars.sh
+# 4. Run deployment: ./deploy.sh
+#
+# Note: Never commit terraform.tfvars.sh or any file containing credentials!
