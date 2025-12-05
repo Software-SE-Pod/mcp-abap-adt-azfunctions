@@ -460,7 +460,7 @@ export async function mcpHandler(
 // Register Azure Function
 app.http('mcp', {
   methods: ['GET', 'POST'],
-  authLevel: 'anonymous',
+  authLevel: 'function',
   route: 'mcp',
   handler: mcpHandler
 });
