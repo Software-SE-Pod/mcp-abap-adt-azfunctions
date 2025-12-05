@@ -8,6 +8,7 @@ locals {
   key_vault_name           = "kv-${substr(var.project_name, 0, 15)}-${local.suffix}"
   function_app_name        = "func-${var.project_name}-${var.environment}-${local.suffix}"
   app_service_plan_name    = "asp-${var.project_name}-${var.environment}"
+  log_analytics_name       = "log-${var.project_name}-${var.environment}"
   app_insights_name        = "appi-${var.project_name}-${var.environment}"
 
   # Common tags for all resources

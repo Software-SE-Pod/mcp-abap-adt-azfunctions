@@ -3,3 +3,6 @@ dist
 node_modules
 package-lock.json
 *.code-workspace
+deploy-temp
+function-app.zip
+.DS_Store

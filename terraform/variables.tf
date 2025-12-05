@@ -57,7 +57,7 @@ variable "node_tls_reject_unauthorized" {
 variable "function_app_sku" {
   type        = string
   description = "SKU for Function App Service Plan (P0v3=Premium V3 Small, P1v3=Premium V3 Medium, B1=Basic, S1=Standard, Y1=Consumption)"
-  default     = "P0v3"
+  default     = "B1"
 }
 
 variable "enable_app_insights" {

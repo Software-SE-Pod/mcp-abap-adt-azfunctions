@@ -10,10 +10,6 @@ terraform {
       source  = "hashicorp/random"
       version = "~> 3.5"
     }
-    archive = {
-      source  = "hashicorp/archive"
-      version = "~> 2.4"
-    }
   }
 
   # Optional: Configure remote backend for state storage
